@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>贪吃蛇</title>
+	<style type="text/css">
+		body{margin: 0;padding: 0;}
+	</style>
+</head>
+<body>
+</body>
+<script type="text/javascript">
+//1.绘制操作界面
+function Map() {
+	var w=800;
+	var h=400;
+	this.showmap = function(){
+		//利用dom技术创建div并设置样式
+		 var mian=document.createElement('div');
+		 mian.style.width=w+'px';
+		 mian.style.height=h+'px';
+		 mian.style.backgroundImage='url(12.png)';
+		 document.body.appendChild(mian);
+	}
+}
+//2.绘制食物
+function Food(){
+	var len=20;
+	this.xFood=0;
+	this.yFood=0;
+	this.pian=null;
+	this.showfood= function(){
+		if(this.pian==null){
+			this.pian=document.createElement('div');
+			this.pian.style.width=this.pian.style.height=len+'px';
+			this.pian.style.backgroundColor='green';
+			//定位
+			this.pian.style.position='absolute';
+			document.body.appendChild(this.pian);
+		}  
+		//步进值20 权值X:0--39 Y:0--19
+		//0到m的随机数Math.floor(Math.random()*m)
+		this.xFood=Math.floor(Math.random()*40);
+		this.yFood=Math.floor(Math.random()*20);
+		this.pian.style.left=this.xFood*20+'px';
+		this.pian.style.top=this.yFood*20+'px';
+	}
+}
+//3.绘制小蛇
+function Snake(){
+	var len=20;
+	//蛇节：[x坐标，y坐标，颜色，div元素节点对象]
+	this.snakebody=[[0,1,'green',null],[1,1,'green',null],[2,1,'green',null],[3,1,'red',null]];
+	this.redirect='right';
+	this.showsnake=function(){
+		//遍历蛇节
+		for (var i = 0; i < this.snakebody.length; i++) {
+			if(this.snakebody[i][3]==null){
+				this.snakebody[i][3]=document.createElement('div');
+				this.snakebody[i][3].style.height=this.snakebody[i][3].style.width=len+'px';
+				this.snakebody[i][3].style.backgroundColor=this.snakebody[i][2];
+				this.snakebody[i][3].style.position='absolute';
+				document.body.appendChild(this.snakebody[i][3]);
+			}
+			//定位
+			this.snakebody[i][3].style.left=this.snakebody[i][0]*len+'px';
+			this.snakebody[i][3].style.top=this.snakebody[i][1]*len+'px';
+		}
+	}
+	this.movesnake =function(){
+		//当前蛇节新坐标等于下个蛇节旧坐标
+		for(var i=0; i<this.snakebody.length-1;i++){
+			this.snakebody[i][0]=this.snakebody[i+1][0];
+			this.snakebody[i][1]=this.snakebody[i+1][1];
+		}
+		//蛇头移动
+		if(this.redirect=='right')
+			this.snakebody[this.snakebody.length-1][0]++ ;
+		else if(this.redirect=='left')
+			this.snakebody[this.snakebody.length-1][0]-- ;
+		else if(this.redirect=='top')
+			this.snakebody[this.snakebody.length-1][1]-- ;
+		else if(this.redirect=='down')
+			this.snakebody[this.snakebody.length-1][1]++ ;
+		//蛇头碰到食物（蛇头坐标和食物坐标一致）
+		var xSnake=this.snakebody[this.snakebody.length-1][0];
+		var ySnake=this.snakebody[this.snakebody.length-1][1];
+		if(xSnake==food.xFood&&ySnake==food.yFood){
+			var newjie=[this.snakebody[0][0],this.snakebody[0][1],'green',null];
+			this.snakebody.unshift(newjie);
+			//生成一个新食物
+			food.showfood();
+		}
+		//规定小蛇移动范围
+		if(xSnake>39||xSnake<0||ySnake>19||ySnake<0){
+			alert('game over');
+			clearInterval(mytime);
+			return false;
+		}
+		//蛇头不能吃到自己
+		for(var k=0;k<this.snakebody.length-1;k++){
+			if(xSnake==this.snakebody[k][0]&&ySnake==this.snakebody[k][1]){
+				alert('kill you by youself game over!');
+				clearInterval(mytime);
+				return false;
+			}
+		}
+		//重新绘制小蛇
+		this.showsnake();
+	}
+}
+var map=new Map();
+var food=new Food();
+var snake=new Snake();
+map.showmap();
+food.showfood();
+snake.showsnake();
+var mytime=setInterval('snake.movesnake()',200);
+//设置键盘触发事件
+document.onkeyup=function(evt){
+	var num=evt.keyCode; 
+	switch(num){
+		case 37:
+			snake.redirect='left';
+			break;
+		case 38:
+			snake.redirect='top';
+			break;
+		case 39:
+			snake.redirect='right';
+			break;
+		case 40:
+			snake.redirect='down';
+			break;
+	}
+}
+</script>
+</html>
